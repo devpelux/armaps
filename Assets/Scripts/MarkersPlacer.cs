@@ -1,6 +1,6 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
@@ -11,7 +11,9 @@ public class MarkersPlacer : MonoBehaviour
     private ARRaycastManager raycastManager;
     private ARAnchorManager anchorManager;
 
-    private static readonly List<ARRaycastHit> hits = new List<ARRaycastHit>();
+    private static readonly List<ARRaycastHit> hits = new();
+
+    private int markerCount = 0;
 
     void Awake()
     {
@@ -21,7 +23,7 @@ public class MarkersPlacer : MonoBehaviour
 
     void Update()
     {
-        if (Input.touchCount > 0)
+        if (markerPrefab != null && Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
             if (touch.phase == TouchPhase.Began)
@@ -31,29 +33,27 @@ public class MarkersPlacer : MonoBehaviour
                     Pose pose = hits[0].pose;
                     ARPlane plane = (ARPlane) hits[0].trackable;
 
-                    _ = AttachAnchor(plane, pose, markerPrefab);
+                    ARAnchor marker = AnchorMarker(plane, pose, markerPrefab);
+
+                    //Scosta il tempo così da avere animazioni progressive tra gli oggetti.
+                    marker.GetOrAddComponent<SyncronizedGameObject>().TimeShift = 0.2f * markerCount;
+
+                    markerCount++;
                 }
             }
         }
     }
 
     /// <summary>
-    /// Crea un ancora con il prefab specificato nel piano e posizione specificati.
-    /// Se il prefab è null, verrà creata un ancora di default.
+    /// Crea un ancora con il marker specificato nel piano e posizione specificati.
+    /// Restituisce l'oggetto creato.
     /// </summary>
-    private ARAnchor AttachAnchor(ARPlane plane, Pose pose, GameObject prefab)
+    private ARAnchor AnchorMarker(ARPlane plane, Pose pose, GameObject marker)
     {
-        if (prefab != null)
-        {
-            GameObject oldPrefab = anchorManager.anchorPrefab;
-            anchorManager.anchorPrefab = prefab;
-            ARAnchor anchor = anchorManager.AttachAnchor(plane, pose);
-            anchorManager.anchorPrefab = oldPrefab;
-            return anchor;
-        }
-        else
-        {
-            return anchorManager.AttachAnchor(plane, pose);
-        }
+        GameObject anchorPrefab = anchorManager.anchorPrefab;
+        anchorManager.anchorPrefab = marker;
+        ARAnchor anchor = anchorManager.AttachAnchor(plane, pose);
+        anchorManager.anchorPrefab = anchorPrefab;
+        return anchor;
     }
 }
