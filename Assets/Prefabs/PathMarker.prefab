@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 217548010406074782}
   - component: {fileID: 1254136802646781645}
   - component: {fileID: 3889070488434486167}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: PathMarker
   m_TagString: Untagged
   m_Icon: {fileID: 0}

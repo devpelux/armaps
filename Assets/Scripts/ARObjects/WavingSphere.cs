@@ -67,6 +67,6 @@ public class WavingSphere : MonoBehaviour
         transform.localScale = new Vector3(currentSize, currentSize, currentSize);
 
         //Imposta il colore.
-        coloredMarker.color = inflation >= highInflation ? highInflationColor : normalColor; //TODO fare un "lerp" del colore??
+        coloredMarker.color = inflation >= highInflation ? highInflationColor : normalColor; //todo fare un "lerp" (fade in / out) del colore?
     }
 }

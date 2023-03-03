@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 3677315450072829694}
   - component: {fileID: 7953324094329720777}
   - component: {fileID: 7096468269689538693}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: DottedPlane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
