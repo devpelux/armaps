@@ -1,27 +1,36 @@
 using UnityEngine;
 
-/// <summary>
-/// Raccoglie le istanze dei pannelli per potervi accedere facilmente globalmente.
-/// </summary>
-public class PanelInstances : MonoBehaviour
+namespace ARMaps.UI
 {
-    [Tooltip("Pannello delle indicazioni.")]
-    public IndicationsPanel indicationsPanel;
-
-    [Tooltip("Pannello delle mappe.")]
-    public MapsPanel mapsPanel;
-
     /// <summary>
-    /// Pannello delle indicazioni.
+    /// Raccoglie le istanze dei pannelli per potervi accedere facilmente globalmente.
     /// </summary>
-    public static IndicationsPanel IndicationsPanel => instance.indicationsPanel;
+    public class PanelInstances : MonoBehaviour
+    {
+        [Tooltip("Pannello delle indicazioni.")]
+        [SerializeField] private IndicationsPanel indicationsPanel;
 
-    /// <summary>
-    /// Pannello delle mappe.
-    /// </summary>
-    public static MapsPanel MapsPanel => instance.mapsPanel;
+        [Tooltip("Pannello delle mappe.")]
+        [SerializeField] private MapsPanel mapsPanel;
 
-    private static PanelInstances instance;
+        /// <summary>
+        /// Ottiene l'istanza del pannello delle indicazioni.
+        /// </summary>
+        public static IndicationsPanel IndicationsPanel => instance.indicationsPanel;
 
-    private void Awake() => instance = this;
+        /// <summary>
+        /// Ottiene l'istanza del pannello delle mappe.
+        /// </summary>
+        public static MapsPanel MapsPanel => instance.mapsPanel;
+
+        /// <summary>
+        /// Istanza del raccoglitore.
+        /// </summary>
+        private static PanelInstances instance;
+
+        /// <summary>
+        /// Eseguito all'avvio.
+        /// </summary>
+        private void Awake() => instance = instance == null ? this : instance;
+    }
 }

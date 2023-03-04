@@ -11,9 +11,7 @@ GameObject:
   - component: {fileID: 7903700409619490002}
   - component: {fileID: 6485269435110501239}
   - component: {fileID: 9071579479618707389}
-  - component: {fileID: 217548010406074782}
   - component: {fileID: 1254136802646781645}
-  - component: {fileID: 3889070488434486167}
   m_Layer: 3
   m_Name: PathMarker
   m_TagString: Untagged
@@ -86,18 +84,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &217548010406074782
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7414126791596113512}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1364b54610d82544683451da65eb6bcd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1254136802646781645
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -111,21 +97,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   size: 0.1
-  waveAmplitude: 0.01
-  wavingTime: 3
-  highInflation: 0.007
+  maxInflation: 0.02
+  signalInflation: 0.01
+  preSignalInflation: 0.005
+  wavingTime: 4
+  waveDelay: 0
   normalColor: {r: 0, g: 0.54191923, b: 1, a: 1}
-  highInflationColor: {r: 1, g: 0, b: 0, a: 1}
---- !u!114 &3889070488434486167
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7414126791596113512}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11524500e01a66547a50e1fa64b6d81a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  color: {r: 1, g: 1, b: 1, a: 1}
+  signalColor: {r: 1, g: 0, b: 0, a: 1}

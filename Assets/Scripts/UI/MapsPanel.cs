@@ -1,77 +1,109 @@
 using ARMaps.Core;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Gestisce il pannello delle mappe.
-/// </summary>
-public class MapsPanel : OpenablePanel
+namespace ARMaps.UI
 {
-    [Tooltip("Pannello ricerca mappe.")]
-    public SearchPanel searchMap;
-
-    [Tooltip("Pulsante creazione mappa.")]
-    public GameObject createMapButton;
-
-    [Tooltip("Pulsante indietro.")]
-    public GameObject backButton;
-
-    private void Start()
+    /// <summary>
+    /// Gestisce il pannello delle mappe.
+    /// </summary>
+    public class MapsPanel : OpenablePanel
     {
-        searchMap.OnSearchTextChange.AddListener(OnSearchMapTextChanged);
-        searchMap.OnResultClick.AddListener(OnSearchMapResultClicked);
-        createMapButton.GetComponent<Button>().onClick.AddListener(OnCreateMapButtonClick);
-        backButton.GetComponent<Button>().onClick.AddListener(ClosePanel);
-    }
+        [Tooltip("Casella di ricerca.")]
+        [SerializeField] private TMP_InputField searchBox;
 
-    public override void OnBeforePanelOpening()
-    {
-        base.OnBeforePanelOpening();
+        [Tooltip("Lista contenente i risultati di ricerca selezionabile.")]
+        [SerializeField] private ButtonList searchResultsButtonList;
 
-        ResetPanel();
-    }
+        [Tooltip("Pulsante creazione mappa.")]
+        [SerializeField] private Button createMapButton;
 
-    public override void OnAfterPanelClosing()
-    {
-        base.OnAfterPanelClosing();
+        [Tooltip("Pulsante indietro.")]
+        [SerializeField] private Button backButton;
 
-        PanelInstances.IndicationsPanel.OpenPanel();
+        /// <summary>
+        /// Eseguito all'avvio. (Il metodo accetta override)
+        /// </summary>
+        protected override void Awake()
+        {
+            base.Awake();
 
-        ResetPanel();
-    }
+            //Registra i listener degli eventi delle componenti.
+            searchBox.onValueChanged.AddListener(OnSearchBoxTextChanged);
+            searchResultsButtonList.OnButtonClick.AddListener(OnSearchResultClicked);
+            createMapButton.onClick.AddListener(OnCreateMapButtonClick);
+            backButton.onClick.AddListener(ClosePanel);
+        }
 
-    public void ResetPanel()
-    {
-        searchMap.Clear();
-        createMapButton.SetActive(false);
-    }
+        /// <summary>
+        /// Resetta il pannello.
+        /// </summary>
+        public override void ResetPanel()
+        {
+            //Ripulisce la casella di ricerca.
+            //Rimuove tutti i pulsanti dei risultati.
+            //Disattiva il pulsante di creazione mappa.
+            searchBox.text = "";
+            searchResultsButtonList.RemoveAllButtons();
+            createMapButton.gameObject.SetActive(false);
+        }
 
-    public void OnCreateMapButtonClick()
-    {
-        MapsManager.Instance.SwitchMap(searchMap.Text);
-        ClosePanel();
-    }
+        /// <summary>
+        /// Eseguito dopo che è finita l'animazione di chiusura.
+        /// </summary>
+        public override void OnAfterPanelClosing()
+        {
+            //Apre il pannello delle indicazioni.
+            PanelInstances.IndicationsPanel.OpenPanel();
 
-    private void OnSearchMapResultClicked(string mapName)
-    {
-        MapsManager.Instance.SwitchMap(mapName);
-        ClosePanel();
-    }
+            base.OnAfterPanelClosing();
+        }
 
-    private void OnSearchMapTextChanged(string mapName)
-    {
-        searchMap.ClearResultButtons();
+        /// <summary>
+        /// Eseguito quando la casella di ricerca cambia il valore del testo.
+        /// </summary>
+        private void OnSearchBoxTextChanged(string mapName)
+        {
+            //Rimuove i risultati di un eventuale ricerca precedente.
+            searchResultsButtonList.RemoveAllButtons();
 
-        List<ARMap> maps = MapsManager.Instance.FilterMaps(mapName);
+            //Filtra le mappe ottenendo quelle che contengono il nome cercato.
+            List<ARMap> maps = MapsManager.Instance.FilterMaps(mapName);
 
-        //Query sui nomi delle mappe, rimuove i duplicati e torna una lista di stringhe.
-        IEnumerable<string> mapNames = (from ARMap map in maps select map.Name).Distinct();
+            //Query sui nomi delle mappe, rimuove i duplicati e torna una lista di stringhe.
+            IEnumerable<string> mapNames = (from ARMap map in maps select map.Name).Distinct();
 
-        createMapButton.SetActive(mapName != "" && !mapNames.Contains(mapName));
+            //Se la mappa non esiste, verrà mostrato il pulsante di creazione mappa.
+            createMapButton.gameObject.SetActive(mapName != "" && !mapNames.Contains(mapName));
 
-        mapNames.Take(3).ToList().ForEach(m => searchMap.AddResultButton(m));
+            //Vengono quindi mostrati i primi 3 risultati di ricerca.
+            mapNames.Take(3).ToList().ForEach(m => searchResultsButtonList.AddButton(m));
+        }
+
+        /// <summary>
+        /// Eseguito al click su un pulsante dei risultati di ricerca.
+        /// </summary>
+        private void OnSearchResultClicked(string mapName)
+        {
+            //Cambia la mappa corrente con quella scelta (che esisterà).
+            //Chiude quindi il pannello.
+            MapsManager.Instance.SwitchMap(mapName);
+            ClosePanel();
+        }
+
+        /// <summary>
+        /// Eseguito al click sul pulsante di creazione mappa.
+        /// </summary>
+        private void OnCreateMapButtonClick()
+        {
+            //Cambia la mappa corrente con quella scelta (se non esiste, verrà creata).
+            //Chiude quindi il pannello.
+            MapsManager.Instance.SwitchMap(searchBox.text);
+            ClosePanel();
+        }
     }
 }

@@ -1,16 +1,31 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class IndicationsButton : MonoBehaviour
+namespace ARMaps.UI
 {
-    private void Awake()
+    /// <summary>
+    /// Pulsante visualizzatore del pannello delle indicazioni.
+    /// </summary>
+    [RequireComponent(typeof(Button))]
+    public class IndicationsButton : MonoBehaviour
     {
-        GetComponent<Button>().onClick.AddListener(IndicationsButtonClick);
-    }
+        /// <summary>
+        /// Eseguito all'avvio.
+        /// </summary>
+        private void Awake()
+        {
+            //Registra il click listener.
+            GetComponent<Button>().onClick.AddListener(OnIndicationsButtonClick);
+        }
 
-    private void IndicationsButtonClick()
-    {
-        gameObject.SetActive(false);
-        PanelInstances.IndicationsPanel.OpenPanel();
+        /// <summary>
+        /// Eseguito al click sul pulsante.
+        /// </summary>
+        private void OnIndicationsButtonClick()
+        {
+            //Disattiva il pulsante e apre il pannello delle indicazioni.
+            gameObject.SetActive(false);
+            PanelInstances.IndicationsPanel.OpenPanel();
+        }
     }
 }
