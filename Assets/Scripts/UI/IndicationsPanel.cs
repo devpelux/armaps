@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 using TMPro;
+using System;
 
 namespace ARMaps.UI
 {
@@ -31,13 +32,13 @@ namespace ARMaps.UI
         [SerializeField] private Button closeButton;
 
         [Tooltip("Casella di ricerca sorgenti.")]
-        [SerializeField] private TMP_InputField searchSourceBox;
+        [SerializeField] private SearchBox searchSourceBox;
 
         [Tooltip("Lista contenente i risultati della ricerca delle sorgenti selezionabile.")]
         [SerializeField] private ButtonList searchSourceResultsButtonList;
 
         [Tooltip("Casella di ricerca destinazioni.")]
-        [SerializeField] private TMP_InputField searchDestinationBox;
+        [SerializeField] private SearchBox searchDestinationBox;
 
         [Tooltip("Lista contenente i risultati della ricerca delle sorgenti selezionabile.")]
         [SerializeField] private ButtonList searchDestinationResultsButtonList;
@@ -72,8 +73,10 @@ namespace ARMaps.UI
             closeButton.onClick.AddListener(ClosePanel);
 
             //Registra i listener degli eventi di ricerca e selezione.
-            searchSourceBox.onValueChanged.AddListener(OnSearchSourceBoxTextChanged);
-            searchDestinationBox.onValueChanged.AddListener(OnSearchDestinationBoxTextChanged);
+            searchSourceBox.OnValueChanged.AddListener(OnSearchSourceBoxTextChanged);
+            searchSourceBox.OnReinitialized.AddListener(() => OnSearchSourceBoxTextChanged(""));
+            searchDestinationBox.OnValueChanged.AddListener(OnSearchDestinationBoxTextChanged);
+            searchDestinationBox.OnReinitialized.AddListener(() => OnSearchDestinationBoxTextChanged(""));
             searchSourceResultsButtonList.OnButtonClick.AddListener(OnSearchSourceResultClicked);
             searchDestinationResultsButtonList.OnButtonClick.AddListener(OnSearchDestinationResultClicked);
         }
@@ -81,7 +84,7 @@ namespace ARMaps.UI
         /// <summary>
         /// Resetta il pannello.
         /// </summary>
-        public override void ResetPanel()
+        public override void Reinitialize()
         {
             //Imposta la mappa corrente nel titolo.
             titleText.text = preTitle + " " + MapsManager.Instance.CurrentMap.Name;
@@ -90,15 +93,11 @@ namespace ARMaps.UI
             selectedSource = selectedDestination = null;
 
             //Resetta le caselle di ricerca.
-            searchSourceResultsButtonList.RemoveAllButtons();
-            searchSourceBox.text = "";
-            searchSourceBox.readOnly = false;
-            searchDestinationResultsButtonList.RemoveAllButtons();
-            searchDestinationBox.text = "";
-            searchDestinationBox.readOnly = false;
+            searchSourceBox.Reinitialize();
+            searchDestinationBox.Reinitialize();
 
             //Disattiva la casella di ricerca delle destinazioni.
-            searchDestinationBox.transform.parent.gameObject.SetActive(false);
+            searchDestinationBox.gameObject.SetActive(false);
             searchDestinationResultsButtonList.gameObject.SetActive(false);
 
             //Disattiva tutti i pulsanti eventualmente attivati.
@@ -150,7 +149,7 @@ namespace ARMaps.UI
 
             //Aggiunge un pulsante con il testo cercato, se non esiste, e visualizza 2 risultati.
             //Altrimenti visualizza 3 risultati.
-            if (source != "" && !sources.Contains(source))
+            if (source != "" && !sources.Contains(source, StringComparer.OrdinalIgnoreCase))
             {
                 searchSourceResultsButtonList.AddButton(source);
                 sources.Take(2).ToList().ForEach(s => searchSourceResultsButtonList.AddButton(s));
@@ -180,7 +179,7 @@ namespace ARMaps.UI
 
                 //Aggiunge un pulsante con il testo cercato, se non esiste, e visualizza 2 risultati.
                 //Altrimenti visualizza 3 risultati.
-                if (destination != "" && !destinations.Contains(destination))
+                if (destination != "" && !destinations.Contains(destination, StringComparer.OrdinalIgnoreCase))
                 {
                     searchDestinationResultsButtonList.AddButton(destination);
                     destinations.Take(2).ToList().ForEach(s => searchDestinationResultsButtonList.AddButton(s));
@@ -204,9 +203,10 @@ namespace ARMaps.UI
                 selectedSource = source;
 
                 //Imposta la casella di ricerca come read-only quindi attiva la ricerca della destinazione.
-                searchSourceBox.readOnly = true;
-                searchDestinationBox.transform.parent.gameObject.SetActive(true);
+                searchSourceBox.ReadOnly = true;
                 searchDestinationResultsButtonList.gameObject.SetActive(true);
+                searchDestinationBox.gameObject.SetActive(true);
+                searchDestinationBox.Reinitialize();
             }
             else
             {
@@ -215,13 +215,11 @@ namespace ARMaps.UI
                 selectedSource = selectedDestination = null;
 
                 //Imposta la casella di ricerca come non read-only.
-                searchSourceBox.readOnly = true;
+                searchSourceBox.ReadOnly = false;
 
                 //Resetta e disattiva la ricerca della destinazione.
-                searchDestinationResultsButtonList.RemoveAllButtons();
-                searchDestinationBox.readOnly = false;
-                searchDestinationBox.text = "";
-                searchDestinationBox.transform.parent.gameObject.SetActive(false);
+                searchDestinationBox.Reinitialize();
+                searchDestinationBox.gameObject.SetActive(false);
                 searchDestinationResultsButtonList.gameObject.SetActive(false);
 
                 //Disattiva tutti i pulsanti eventualmente attivati.
@@ -242,7 +240,7 @@ namespace ARMaps.UI
                 selectedDestination = destination;
 
                 //Imposta la casella di ricerca come read-only.
-                searchDestinationBox.readOnly = true;
+                searchDestinationBox.ReadOnly = true;
 
                 //Attiva il pulsante corretto tra "crea percorso" e "ottieni indicazioni".
                 if (MapsManager.Instance.CurrentMap.PathExists(selectedSource, selectedDestination))
@@ -265,7 +263,7 @@ namespace ARMaps.UI
                 selectedDestination = null;
 
                 //Imposta la casella di ricerca come non read-only, e disattiva il pulsante eventualmente attivato prima.
-                searchSourceBox.readOnly = true;
+                searchDestinationBox.ReadOnly = false;
                 getIndicationsButton.gameObject.SetActive(false);
                 createPathButton.gameObject.SetActive(false);
             }

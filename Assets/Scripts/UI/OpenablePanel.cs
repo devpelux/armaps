@@ -35,9 +35,9 @@ namespace ARMaps.UI
         }
 
         /// <summary>
-        /// Resetta il pannello.
+        /// Resetta il pannello alle condizioni iniziali.
         /// </summary>
-        public virtual void ResetPanel() { }
+        public virtual void Reinitialize() { }
 
         /// <summary>
         /// Eseguito prima che inizia l'animazione di apertura.
@@ -45,7 +45,7 @@ namespace ARMaps.UI
         public virtual void OnBeforePanelOpening()
         {
             //Resetta il pannello.
-            ResetPanel();
+            Reinitialize();
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace ARMaps.UI
         public virtual void OnAfterPanelClosing()
         {
             //Resetta il pannello e lo disattiva.
-            ResetPanel();
+            Reinitialize();
             gameObject.SetActive(false);
         }
     }

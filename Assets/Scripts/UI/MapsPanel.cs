@@ -1,7 +1,7 @@
 using ARMaps.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,7 +14,7 @@ namespace ARMaps.UI
     public class MapsPanel : OpenablePanel
     {
         [Tooltip("Casella di ricerca.")]
-        [SerializeField] private TMP_InputField searchBox;
+        [SerializeField] private SearchBox searchBox;
 
         [Tooltip("Lista contenente i risultati di ricerca selezionabile.")]
         [SerializeField] private ButtonList searchResultsButtonList;
@@ -33,7 +33,8 @@ namespace ARMaps.UI
             base.Awake();
 
             //Registra i listener degli eventi delle componenti.
-            searchBox.onValueChanged.AddListener(OnSearchBoxTextChanged);
+            searchBox.OnValueChanged.AddListener(OnSearchBoxTextChanged);
+            searchBox.OnReinitialized.AddListener(() => OnSearchBoxTextChanged(""));
             searchResultsButtonList.OnButtonClick.AddListener(OnSearchResultClicked);
             createMapButton.onClick.AddListener(OnCreateMapButtonClick);
             backButton.onClick.AddListener(ClosePanel);
@@ -42,13 +43,12 @@ namespace ARMaps.UI
         /// <summary>
         /// Resetta il pannello.
         /// </summary>
-        public override void ResetPanel()
+        public override void Reinitialize()
         {
             //Ripulisce la casella di ricerca.
             //Rimuove tutti i pulsanti dei risultati.
             //Disattiva il pulsante di creazione mappa.
-            searchBox.text = "";
-            searchResultsButtonList.RemoveAllButtons();
+            searchBox.Reinitialize();
             createMapButton.gameObject.SetActive(false);
         }
 
@@ -78,7 +78,7 @@ namespace ARMaps.UI
             IEnumerable<string> mapNames = (from ARMap map in maps select map.Name).Distinct();
 
             //Se la mappa non esiste, verrà mostrato il pulsante di creazione mappa.
-            createMapButton.gameObject.SetActive(mapName != "" && !mapNames.Contains(mapName));
+            createMapButton.gameObject.SetActive(mapName != "" && !mapNames.Contains(mapName, StringComparer.OrdinalIgnoreCase));
 
             //Vengono quindi mostrati i primi 3 risultati di ricerca.
             mapNames.Take(3).ToList().ForEach(m => searchResultsButtonList.AddButton(m));
@@ -102,7 +102,7 @@ namespace ARMaps.UI
         {
             //Cambia la mappa corrente con quella scelta (se non esiste, verrà creata).
             //Chiude quindi il pannello.
-            MapsManager.Instance.SwitchMap(searchBox.text);
+            MapsManager.Instance.SwitchMap(searchBox.Text);
             ClosePanel();
         }
     }
