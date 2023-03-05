@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 
 namespace ARMaps.Core
 {
@@ -23,12 +24,20 @@ namespace ARMaps.Core
         /// <summary>
         /// Esegue l'azione specificata su tutti i figli della transform.
         /// </summary>
-        public static void ForEachChild(this Transform transform, System.Action<Transform> action)
+        public static void ForEachChild(this Transform transform, UnityAction<Transform> action)
         {
             foreach (Transform child in transform)
             {
                 action?.Invoke(child);
             }
+        }
+
+        /// <summary>
+        /// Compara due stringhe con il modo <see cref="System.StringComparison.OrdinalIgnoreCase"/>.
+        /// </summary>
+        public static bool EqualsInsensitive(this string str, string str2)
+        {
+            return str.Equals(str2, System.StringComparison.OrdinalIgnoreCase);
         }
     }
 }

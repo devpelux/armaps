@@ -4,12 +4,12 @@ using UnityEngine.UI;
 
 namespace ARMaps
 {
-    public class PathCreationManager : MonoBehaviour
+    public class PathManager : MonoBehaviour
     {
         /// <summary>
         /// Accede all'istanza del manager.
         /// </summary>
-        public static PathCreationManager Instance { get; private set; }
+        public static PathManager Instance { get; private set; }
 
         public Button saveButton;
         public Button discardButton;
@@ -18,7 +18,7 @@ namespace ARMaps
         private string source;
         private string destination;
 
-        private PathCreationManager() { }
+        private PathManager() { }
 
         /// <summary>
         /// Eseguito all'avvio.

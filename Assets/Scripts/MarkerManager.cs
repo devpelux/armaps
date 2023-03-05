@@ -6,7 +6,7 @@ using UnityEngine.XR.ARSubsystems;
 
 namespace ARMaps
 {
-    public class MarkersPlacer : MonoBehaviour
+    public class MarkerManager : MonoBehaviour
     {
         public GameObject markerPrefab;
 

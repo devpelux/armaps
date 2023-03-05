@@ -105,11 +105,17 @@ namespace ARMaps.Core
         /// Confronta il percorso con un altro.
         /// Saranno uguali se hanno stessa sorgente e stessa destinazione.
         /// </summary>
-        public override bool Equals(object obj) => obj is ARPath path && path.Source == Source && path.Destination == Destination;
+        public override bool Equals(object obj) => obj is ARPath path && Matcher(path, Source, Destination);
 
         /// <summary>
         /// Restituisce l'hash code del percorso.
         /// </summary>
-        public override int GetHashCode() => HashCode.Combine(Source, Destination);
+        public override int GetHashCode() => HashCode.Combine(Source.ToLower(), Destination.ToLower());
+
+        /// <summary>
+        /// Confronta un percorso specificato con la sorgente e la destinazione specificate.
+        /// </summary>
+        public static bool Matcher(ARPath path, string source, string destination)
+            => path.Source.EqualsInsensitive(source) && path.Destination.EqualsInsensitive(destination);
     }
 }

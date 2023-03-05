@@ -25,6 +25,9 @@ namespace ARMaps.UI
         [Tooltip("Pulsante crea percorso.")]
         [SerializeField] private Button createPathButton;
 
+        [Tooltip("Pulsante cancella percorso.")]
+        [SerializeField] private Button deletePathButton;
+
         [Tooltip("Pulsante mappe.")]
         [SerializeField] private Button mapsButton;
 
@@ -57,6 +60,11 @@ namespace ARMaps.UI
         private string selectedDestination = null;
 
         /// <summary>
+        /// Percorso corrente.
+        /// </summary>
+        private ARPath currentPath = null;
+
+        /// <summary>
         /// Azione da eseguore alla chiusura del pannello.
         /// </summary>
         private string actionOnClose = "none";
@@ -69,6 +77,7 @@ namespace ARMaps.UI
             //Registra i click listener dei pulsanti.
             getIndicationsButton.onClick.AddListener(OnGetIndicationsButtonClick);
             createPathButton.onClick.AddListener(OnCreatePathButtonClick);
+            deletePathButton.onClick.AddListener(OnDeletePathButtonClick);
             mapsButton.onClick.AddListener(OnMapsButtonClick);
             closeButton.onClick.AddListener(ClosePanel);
 
@@ -91,6 +100,7 @@ namespace ARMaps.UI
 
             //Rimuove le selezioni.
             selectedSource = selectedDestination = null;
+            currentPath = null;
 
             //Resetta le caselle di ricerca.
             searchSourceBox.Reinitialize();
@@ -103,6 +113,7 @@ namespace ARMaps.UI
             //Disattiva tutti i pulsanti eventualmente attivati.
             getIndicationsButton.gameObject.SetActive(false);
             createPathButton.gameObject.SetActive(false);
+            deletePathButton.gameObject.SetActive(false);
 
             //Rimiove l'azione alla chiusura eventualmente impostata.
             actionOnClose = "none";
@@ -120,7 +131,7 @@ namespace ARMaps.UI
                     PanelInstances.MapsPanel.OpenPanel();
                     break;
                 case "create_path":
-                    PathCreationManager.Instance.StartCreatingPath(selectedSource, selectedDestination);
+                    PathManager.Instance.StartCreatingPath(selectedSource, selectedDestination);
                     break;
                 case "get_indications":
                     indicationsButton.gameObject.SetActive(true);
@@ -172,7 +183,7 @@ namespace ARMaps.UI
             if (selectedSource != null)
             {
                 //Filtra i percorsi ottenendo quelli che contengono nella destinazione il valore cercato.
-                List<ARPath> paths = MapsManager.Instance.CurrentMap.FilterPaths(selectedSource, destination);
+                List<ARPath> paths = MapsManager.Instance.CurrentMap.FilterPathsOfSource(selectedSource, destination);
 
                 //Query sulle destinazioni, rimuove i duplicati e torna una lista di stringhe.
                 IEnumerable<string> destinations = (from ARPath path in paths select path.Destination).Distinct();
@@ -213,6 +224,7 @@ namespace ARMaps.UI
                 //Se la sorgente selezionata è non null, allora è stato selezionato qualcosa.
                 //Procede alla deselezione di sorgente e destinazione (senza sorgente non si può definire una destinazione).
                 selectedSource = selectedDestination = null;
+                currentPath = null;
 
                 //Imposta la casella di ricerca come non read-only.
                 searchSourceBox.ReadOnly = false;
@@ -225,6 +237,7 @@ namespace ARMaps.UI
                 //Disattiva tutti i pulsanti eventualmente attivati.
                 getIndicationsButton.gameObject.SetActive(false);
                 createPathButton.gameObject.SetActive(false);
+                deletePathButton.gameObject.SetActive(false);
             }
         }
 
@@ -243,17 +256,19 @@ namespace ARMaps.UI
                 searchDestinationBox.ReadOnly = true;
 
                 //Attiva il pulsante corretto tra "crea percorso" e "ottieni indicazioni".
-                if (MapsManager.Instance.CurrentMap.PathExists(selectedSource, selectedDestination))
+                if ((currentPath = MapsManager.Instance.CurrentMap.GetPath(selectedSource, selectedDestination)) != null)
                 {
                     //Se il percorso con sorgente e destinazione selezionate esiste, attiva il pulsante "ottieni indicazioni".
                     getIndicationsButton.gameObject.SetActive(true);
                     createPathButton.gameObject.SetActive(false);
+                    deletePathButton.gameObject.SetActive(true);
                 }
                 else
                 {
                     //Se il percorso con sorgente e destinazione selezionate non esiste, attiva il pulsante "crea percorso".
                     getIndicationsButton.gameObject.SetActive(false);
                     createPathButton.gameObject.SetActive(true);
+                    deletePathButton.gameObject.SetActive(false);
                 }
             }
             else
@@ -261,11 +276,13 @@ namespace ARMaps.UI
                 //Se la sorgente selezionata è non null, allora è stato selezionato qualcosa.
                 //Procede alla deselezione.
                 selectedDestination = null;
+                currentPath = null;
 
                 //Imposta la casella di ricerca come non read-only, e disattiva il pulsante eventualmente attivato prima.
                 searchDestinationBox.ReadOnly = false;
                 getIndicationsButton.gameObject.SetActive(false);
                 createPathButton.gameObject.SetActive(false);
+                deletePathButton.gameObject.SetActive(false);
             }
         }
 
@@ -276,6 +293,26 @@ namespace ARMaps.UI
         {
             actionOnClose = "create_path";
             ClosePanel();
+        }
+
+        /// <summary>
+        /// Eseguito al click sul pulsante di creazione percorso.
+        /// </summary>
+        private void OnDeletePathButtonClick()
+        {
+            //Chiede se cancellare il percorso.
+            GlobalDialog.Instance.Call("Confermi?", "Il percorso verrà cancellato definitivamente e non sarà possibile recuperarlo!",
+                result =>
+                {
+                    if (result == GlobalDialog.Result.YES)
+                    {
+                        //Se è stata confermata la cancellazione cancella il percorso.
+                        MapsManager.Instance.CurrentMap.RemovePath(currentPath);
+
+                        //Resetta il pannello per una nuova ricerca.
+                        Reinitialize();
+                    }
+                });
         }
 
         /// <summary>

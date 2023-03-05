@@ -48,30 +48,14 @@ namespace ARMaps.Core
         }
 
         /// <summary>
-        /// Restituisce tutti i percorsi che contengono nella sorgente il valore specificato.
+        /// Restituisce il percorso nell'indice specificato.
         /// </summary>
-        public List<ARPath> FilterPaths(string partialSource) => paths.FindAll(path => path.Source.ContainsInsensitive(partialSource));
-
-        /// <summary>
-        /// Restituisce tutti i percorsi con la sorgente specificata.
-        /// </summary>
-        public List<ARPath> GetPaths(string source) => paths.FindAll(path => path.Source == source);
-
-        /// <summary>
-        /// Restituisce tutti i percorsi con la sorgente specificata, e che contengono nella destinazione il valore specificato.
-        /// </summary>
-        public List<ARPath> FilterPaths(string source, string partialDestination)
-            => paths.FindAll(path => path.Source == source && path.Destination.ContainsInsensitive(partialDestination));
+        public ARPath GetPath(int index) => paths[index];
 
         /// <summary>
         /// Restituisce il percorso con sorgente e destinazione specificati.
         /// </summary>
-        public ARPath GetPath(string source, string destination) => paths.Find(path => path.Source == source && path.Destination == destination);
-
-        /// <summary>
-        /// Verifica se esiste un percorso con sorgente e destinazione specificati.
-        /// </summary>
-        public bool PathExists(string source, string destination) => paths.Exists(path => path.Source == source && path.Destination == destination);
+        public ARPath GetPath(string source, string destination) => paths.Find(path => ARPath.Matcher(path, source, destination));
 
         /// <summary>
         /// Rimuove il percorso specificato.
@@ -79,19 +63,30 @@ namespace ARMaps.Core
         public void RemovePath(ARPath path) => paths.Remove(path);
 
         /// <summary>
-        /// Rimuove tutti i percorsi.
+        /// Restituisce tutti i percorsi che contengono nella sorgente il valore specificato.
         /// </summary>
-        public void ClearPaths() => paths.Clear();
+        public List<ARPath> FilterPaths(string partialSource) => paths.FindAll(path => path.Source.ContainsInsensitive(partialSource));
+
+        /// <summary>
+        /// Restituisce tutti i percorsi con la sorgente specificata, e che contengono nella destinazione il valore specificato.
+        /// </summary>
+        public List<ARPath> FilterPathsOfSource(string source, string partialDestination)
+            => paths.FindAll(path => path.Source.EqualsInsensitive(source) && path.Destination.ContainsInsensitive(partialDestination));
 
         /// <summary>
         /// Confronta la mappa con un altra.
         /// Saranno uguali se hanno lo stesso nome.
         /// </summary>
-        public override bool Equals(object obj) => obj is ARMap map && map.Name == Name;
+        public override bool Equals(object obj) => obj is ARMap map && Matcher(map, Name);
 
         /// <summary>
         /// Restituisce l'hash code della mappa.
         /// </summary>
-        public override int GetHashCode() => HashCode.Combine(Name);
+        public override int GetHashCode() => HashCode.Combine(Name.ToLower());
+
+        /// <summary>
+        /// Confronta una mappa specificata con il nome specificato.
+        /// </summary>
+        public static bool Matcher(ARMap map, string name) => map.Name.EqualsInsensitive(name);
     }
 }
