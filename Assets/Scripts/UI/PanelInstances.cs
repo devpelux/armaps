@@ -29,6 +29,11 @@ namespace ARMaps.UI
         private static PanelInstances instance;
 
         /// <summary>
+        /// Inizializza PanelInstances.
+        /// </summary>
+        private PanelInstances() { }
+
+        /// <summary>
         /// Eseguito all'avvio.
         /// </summary>
         private void Awake() => instance = instance == null ? this : instance;

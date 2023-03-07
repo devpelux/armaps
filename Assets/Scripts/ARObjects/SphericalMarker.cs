@@ -1,13 +1,14 @@
 using ARMaps.Core;
 using UnityEngine;
+using UnityEngine.XR.ARFoundation;
 
 namespace ARMaps.ARObjects
 {
     /// <summary>
     /// Una sfera che si ingrandisce e riduce in un dato intervallo.
+    /// Dovrebbe avere come padre un <see cref="ARAnchor"/>.
     /// </summary>
-    [RequireComponent(typeof(Renderer))]
-    public class PathMarker : MonoBehaviour
+    public class SphericalMarker : MonoBehaviour
     {
         [Tooltip("Dimensione media.")]
         public float size = 1;
@@ -73,5 +74,25 @@ namespace ARMaps.ARObjects
             //Calcola il colore da impostare e lo imposta (effettua un lerp tra i colori in base a signalStrength).
             GetComponent<Renderer>().material.color = Color.Lerp(normalColor, signalColor, signalStrength);
         }
+
+        /// <summary>
+        /// Restituisce l'ancora padre a partire dal marker.
+        /// </summary>
+        public static GameObject GetAnchor(GameObject marker) => marker.transform.parent.gameObject;
+
+        /// <summary>
+        /// Restituisce il componente ancora padre a partire dal marker.
+        /// </summary>
+        public static ARAnchor GetAnchorComponent(GameObject marker) => GetAnchor(marker).GetComponent<ARAnchor>();
+
+        /// <summary>
+        /// Restituisce il marker a partire dall'ancora.
+        /// </summary>
+        public static GameObject GetMarker(GameObject anchor) => anchor.transform.GetChild(0).gameObject;
+
+        /// <summary>
+        /// Restituisce il componente marker a partire dall'ancora.
+        /// </summary>
+        public static SphericalMarker GetMarkerComponent(GameObject anchor) => GetMarker(anchor).GetComponent<SphericalMarker>();
     }
 }

@@ -131,13 +131,15 @@ namespace ARMaps.UI
                     PanelInstances.MapsPanel.OpenPanel();
                     break;
                 case "create_path":
-                    PathManager.Instance.StartCreatingPath(selectedSource, selectedDestination);
+                    PathManager.Instance.StartCreatingPath(MapsManager.Instance.CurrentMap.CreatePath(selectedSource, selectedDestination));
                     break;
                 case "get_indications":
-                    indicationsButton.gameObject.SetActive(true);
+                    PathManager.Instance.ShowPathIndications(currentPath);
                     break;
                 case "none":
                     indicationsButton.gameObject.SetActive(true);
+                    break;
+                default:
                     break;
             }
 
